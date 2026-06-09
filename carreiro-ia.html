@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Carreiro.IA — Sinais</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #080b10;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      color: #e6edf3;
+      padding: 20px;
+    }
+
+    .app {
+      background: #0d1117;
+      border-radius: 20px;
+      padding: 28px 24px;
+      width: 100%;
+      max-width: 480px;
+      border: 0.5px solid #21262d;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+
+    .logo-wrap svg {
+      width: 42px;
+      height: 42px;
+    }
+
+    .header-text { flex: 1; }
+    .header-title { font-size: 19px; font-weight: 600; color: #e6edf3; letter-spacing: -0.01em; }
+    .header-sub { font-size: 12px; color: #7d8590; margin-top: 2px; }
+
+    .brt-clock { font-size: 12px; color: #7d8590; text-align: right; line-height: 1.5; }
+    .brt-clock span { color: #e6edf3; font-weight: 500; display: block; font-size: 14px; }
+
+    .section-label {
+      font-size: 10px;
+      color: #7d8590;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 10px;
+    }
+
+    .pairs-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 22px;
+    }
+
+    .pair-btn {
+      background: #161b22;
+      border: 0.5px solid #21262d;
+      border-radius: 10px;
+      padding: 12px 6px;
+      cursor: pointer;
+      text-align: center;
+      transition: border-color 0.15s, background 0.15s, color 0.15s;
+      color: #c9d1d9;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+    }
+
+    .pair-btn:hover { border-color: #e8431a; background: #e8431a0d; }
+    .pair-btn.selected { border-color: #e8431a; background: #e8431a18; color: #e8431a; }
+
+    .timeframes {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+
+    .tf-btn {
+      flex: 1;
+      background: #161b22;
+      border: 0.5px solid #21262d;
+      border-radius: 10px;
+      padding: 12px 8px;
+      cursor: pointer;
+      text-align: center;
+      color: #c9d1d9;
+      font-size: 14px;
+      font-weight: 600;
+      transition: border-color 0.15s, background 0.15s, color 0.15s;
+    }
+
+    .tf-btn:hover { border-color: #e8431a; background: #e8431a0d; }
+    .tf-btn.selected { border-color: #e8431a; background: #e8431a18; color: #e8431a; }
+    .tf-sub { font-size: 10px; color: #7d8590; display: block; margin-top: 3px; font-weight: 400; }
+    .tf-btn.selected .tf-sub { color: #e8431a90; }
+
+    .generate-btn {
+      width: 100%;
+      background: #e8431a;
+      border: none;
+      border-radius: 12px;
+      padding: 15px;
+      font-size: 15px;
+      font-weight: 600;
+      color: #fff;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: opacity 0.15s, transform 0.1s;
+      letter-spacing: 0.01em;
+    }
+
+    .generate-btn:hover { opacity: 0.9; }
+    .generate-btn:active { transform: scale(0.98); }
+    .generate-btn:disabled { opacity: 0.3; cursor: default; transform: none; }
+    .generate-btn i { font-size: 18px; }
+
+    .signal-card {
+      background: #161b22;
+      border-radius: 14px;
+      padding: 20px;
+      margin-top: 20px;
+      border: 0.5px solid #21262d;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 0.25s, transform 0.25s;
+      display: none;
+    }
+
+    .signal-card.show {
+      display: block;
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .signal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .signal-pair { font-size: 24px; font-weight: 700; color: #e6edf3; letter-spacing: -0.02em; }
+
+    .signal-badge {
+      padding: 7px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+    }
+
+    .badge-buy { background: #0d2818; color: #3fb950; border: 0.5px solid #3fb95050; }
+    .badge-sell { background: #280d0d; color: #f85149; border: 0.5px solid #f8514950; }
+
+    .signal-rows {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .signal-item {
+      background: #0d1117;
+      border-radius: 10px;
+      padding: 14px 12px;
+    }
+
+    .signal-item-label {
+      font-size: 10px;
+      color: #7d8590;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .signal-item-label i { font-size: 13px; }
+    .signal-item-value { font-size: 17px; font-weight: 600; color: #e6edf3; }
+
+    .signal-alert {
+      background: #1e1208;
+      border: 0.5px solid #e8431a35;
+      border-radius: 10px;
+      padding: 11px 14px;
+      font-size: 12px;
+      color: #e8431a;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      line-height: 1.5;
+    }
+
+    .signal-alert i { font-size: 16px; flex-shrink: 0; }
+
+    .footer {
+      margin-top: 28px;
+      text-align: center;
+      font-size: 11px;
+      color: #484f58;
+    }
+
+    @media (max-width: 400px) {
+      .app { padding: 20px 16px; }
+      .pairs-grid { grid-template-columns: repeat(3, 1fr); gap: 6px; }
+      .pair-btn { font-size: 11px; padding: 10px 4px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="app">
+
+  <div class="header">
+    <div class="logo-wrap">
+      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <polygon points="14,10 14,90 70,50" fill="#e8431a"/>
+        <path d="M76,32 Q94,50 76,68" fill="none" stroke="#7a1e0a" stroke-width="8" stroke-linecap="round"/>
+        <path d="M84,22 Q108,50 84,78" fill="none" stroke="#7a1e0a" stroke-width="8" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div class="header-text">
+      <div class="header-title">Carreiro.IA</div>
+      <div class="header-sub">Sinais · Forex & Cripto</div>
+    </div>
+    <div class="brt-clock">
+      Brasília
+      <span id="brtClock">--:--:--</span>
+    </div>
+  </div>
+
+  <div class="section-label">Par de moedas</div>
+  <div class="pairs-grid" id="pairsGrid"></div>
+
+  <div class="section-label">Tempo de expiração</div>
+  <div class="timeframes">
+    <button class="tf-btn" data-tf="1" onclick="selectTF(this)">
+      M1 <span class="tf-sub">1 minuto</span>
+    </button>
+    <button class="tf-btn" data-tf="5" onclick="selectTF(this)">
+      M5 <span class="tf-sub">5 minutos</span>
+    </button>
+    <button class="tf-btn" data-tf="15" onclick="selectTF(this)">
+      M15 <span class="tf-sub">15 minutos</span>
+    </button>
+  </div>
+
+  <button class="generate-btn" id="genBtn" onclick="generateSignal()" disabled>
+    <i class="ti ti-bolt"></i> Gerar sinal
+  </button>
+
+  <div class="signal-card" id="signalCard">
+    <div class="signal-header">
+      <div class="signal-pair" id="sigPair">—</div>
+      <div class="signal-badge" id="sigBadge">—</div>
+    </div>
+    <div class="signal-rows">
+      <div class="signal-item">
+        <div class="signal-item-label"><i class="ti ti-clock"></i> Entrada</div>
+        <div class="signal-item-value" id="sigTime">—</div>
+      </div>
+      <div class="signal-item">
+        <div class="signal-item-label"><i class="ti ti-timer"></i> Expiração</div>
+        <div class="signal-item-value" id="sigTF">—</div>
+      </div>
+    </div>
+    <div class="signal-alert">
+      <i class="ti ti-info-circle"></i>
+      <span>Entre <strong>2 segundos antes</strong> do horário indicado para compensar o delay da plataforma.</span>
+    </div>
+  </div>
+
+  <div class="footer">Carreiro.IA · Apenas fins educacionais</div>
+</div>
+
+<script>
+  const pairs = [
+    "EUR/USD","GBP/USD","AUD/CAD",
+    "USD/JPY","EUR/GBP","USD/CHF",
+    "NZD/USD","USD/CAD","BTC/USD",
+    "ETH/USD","LTC/USD","XRP/USD"
+  ];
+
+  let selectedPair = null;
+  let selectedTF = null;
+
+  function getBRT() {
+    return new Date(new Date().toLocaleString("en-US", { timeZone: "America/Sao_Paulo" }));
+  }
+
+  const grid = document.getElementById("pairsGrid");
+  pairs.forEach(p => {
+    const btn = document.createElement("button");
+    btn.className = "pair-btn";
+    btn.textContent = p;
+    btn.onclick = () => {
+      document.querySelectorAll(".pair-btn").forEach(b => b.classList.remove("selected"));
+      btn.classList.add("selected");
+      selectedPair = p;
+      checkReady();
+    };
+    grid.appendChild(btn);
+  });
+
+  function selectTF(el) {
+    document.querySelectorAll(".tf-btn").forEach(b => b.classList.remove("selected"));
+    el.classList.add("selected");
+    selectedTF = parseInt(el.dataset.tf);
+    checkReady();
+  }
+
+  function checkReady() {
+    document.getElementById("genBtn").disabled = !(selectedPair && selectedTF);
+  }
+
+  function generateSignal() {
+    const now = getBRT();
+    const direction = Math.random() > 0.5 ? "BUY" : "SELL";
+    const totalMins = now.getHours() * 60 + now.getMinutes();
+    const nextCandle = Math.ceil((totalMins + 1) / selectedTF) * selectedTF;
+    const entryH = Math.floor(nextCandle / 60) % 24;
+    const entryM = nextCandle % 60;
+    const hh = String(entryH).padStart(2, "0");
+    const mm = String(entryM).padStart(2, "0");
+
+    document.getElementById("sigPair").textContent = selectedPair;
+    const badge = document.getElementById("sigBadge");
+    badge.textContent = direction;
+    badge.className = "signal-badge " + (direction === "BUY" ? "badge-buy" : "badge-sell");
+    document.getElementById("sigTime").textContent = hh + ":" + mm + " (BRT)";
+    document.getElementById("sigTF").textContent = selectedTF + " minuto" + (selectedTF > 1 ? "s" : "");
+
+    const card = document.getElementById("signalCard");
+    card.style.display = "none";
+    card.classList.remove("show");
+    void card.offsetWidth;
+    card.style.display = "block";
+    setTimeout(() => card.classList.add("show"), 10);
+  }
+
+  function updateClock() {
+    const now = getBRT();
+    const hh = String(now.getHours()).padStart(2, "0");
+    const mm = String(now.getMinutes()).padStart(2, "0");
+    const ss = String(now.getSeconds()).padStart(2, "0");
+    document.getElementById("brtClock").textContent = hh + ":" + mm + ":" + ss;
+  }
+
+  updateClock();
+  setInterval(updateClock, 1000);
+</script>
+
+</body>
+</html>
